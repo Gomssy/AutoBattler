@@ -142,6 +142,43 @@ public class Piece : MonoBehaviour
 
         return curCellPos;
     }
+    public bool Move(Vector3 target)
+    {
+        if (pieceState is PieceState.Idle)
+        {
+            targetPos = target;
+            lastMove = TargetPos;
+
+            animator.SetBool("isMoving", true);
+            pieceState = PieceState.Move;
+            StartCoroutine("MoveStep");
+            return true;
+        }
+        else
+            return false;
+    }
+
+    IEnumerator MoveStep()
+    {
+        var percent = 0f;
+        if (target.transform.position.x < transform.position.x)
+            GetComponent<SpriteRenderer>().flipX = true;
+
+        while(pieceState is PieceState.Move)
+        {
+            transform.position = Vector3.Lerp(transform.position, targetPos, percent);
+            if (percent >= 1f)
+            {
+                transform.position = targetPos;
+                pieceState = PieceState.Idle;
+                animator.SetBool("Stop", true);
+                yield break;
+            }
+            else
+                yield return null;
+        }
+        yield break;
+    }
 }
 
     public enum PieceState

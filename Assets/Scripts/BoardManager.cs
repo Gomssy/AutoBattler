@@ -66,6 +66,7 @@ public class BoardManager : Singleton<BoardManager>
             return true;
         }
         return false;
+
     }
 
     public Piece AddPiece(Piece piece)
@@ -77,4 +78,5 @@ public class BoardManager : Singleton<BoardManager>
         }
         return null;
     }
+
 }
