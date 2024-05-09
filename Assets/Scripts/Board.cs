@@ -6,4 +6,5 @@ public class Board : MonoBehaviour
 {
     public int _x;
     public int _y;
+    public bool pieceExist = false;
 }

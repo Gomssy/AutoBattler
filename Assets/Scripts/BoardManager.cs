@@ -38,4 +38,14 @@ public class BoardManager : Singleton<BoardManager>
         return board;
     }
 
+    public Board GetBoard(Vector3 pos)
+    {
+        foreach(var board in boards)
+        {
+            if(Vector3Int.RoundToInt(board.transform.position) == Vector3Int.RoundToInt(pos))
+                return board;
+        }
+        return null;
+    }
+
 }
