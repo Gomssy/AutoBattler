@@ -13,8 +13,19 @@ public class Piece : MonoBehaviour
     public Vector3 currentPos => transform.position;
     public Vector3 offset = new Vector3(0.5f, 0.5f, 0f);
 
+    public int health = 5;
+    public bool alive => health > 0;
+    public bool isRangeAttack;
+
+    private Vector3 targetPos;
+    public Vector3 TargetPos => targetPos;
+    public Vector3 lastMove;
+    public Piece target;
+
     public bool canDrag = false;
-    private bool canPlace;
+    private bool canPlace = true;
+
+
 
     public bool CanPlace
     {
@@ -32,14 +43,14 @@ public class Piece : MonoBehaviour
     {
         get
         {
-            return canDrag || canPlace;
+            return canDrag || CanPlace;
         }
         set
         {
             if(value == false)
             {
                 canDrag = false;
-                canPlace = false;
+                CanPlace = false;
             }
         }
     }
@@ -52,16 +63,18 @@ public class Piece : MonoBehaviour
 
     public void OnMouseDown()
     {
-       // if (!canClick) return;
-        canDrag = true;
-        defaultPos = transform.position;
+       if (!canClick) return;
     }
     public void OnMouseDrag()
     {
-        if (canPlace)
+        if (CanPlace)
         {
-            if (!BoardManager.Inst.placingMask.activeSelf)
-                BoardManager.Inst.placingMask.SetActive(true);
+            /*if (!BoardManager.Inst.placingMask.activeSelf)
+                BoardManager.Inst.placingMask.SetActive(true);*/
+            Vector3 curPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0f);
+            Vector3 curPos = Camera.main.ScreenToWorldPoint(curPoint);
+            curPos.z = 0f;
+            transform.position = curPos;
         }
         if (canDrag)
         {
@@ -77,12 +90,7 @@ public class Piece : MonoBehaviour
     {
         if(canDrag)
         {
-            var curCellPos = Vector3Int.RoundToInt(currentPos - offset);
-            if (currentPos.x - curCellPos.x > offset.x)
-                curCellPos.x += (int)(2 * offset.x);
-            if (currentPos.y - curCellPos.y > offset.y)
-                curCellPos.y += (int)(2 * offset.y);
-
+            var curCellPos = CalcCurCellPos();
             if (boardManager.canPlace(curCellPos))
             {
                 boardManager.PlacePiece(Vector3Int.RoundToInt(defaultPos), null);
@@ -90,6 +98,8 @@ public class Piece : MonoBehaviour
 
                 transform.position = curCellPos;
                 defaultPos = transform.position;
+                targetPos = transform.position;
+                lastMove = TargetPos;
             }
             else
             {
@@ -97,17 +107,19 @@ public class Piece : MonoBehaviour
             }
         }
         
-        if(canPlace)
+        if(CanPlace)
         {
-            boardManager.placingMask.SetActive(false);
-            var curCellPos = Vector3Int.RoundToInt(currentPos - offset);
-            if(boardManager.canPlace(curCellPos))
+            //boardManager.placingMask.SetActive(false);
+            var curCellPos = CalcCurCellPos();
+            if (boardManager.canPlace(curCellPos))
             {
                 var addedPiece = boardManager.AddPiece(this);
                 if (addedPiece != null)
                 {
                     addedPiece.transform.position = curCellPos;
                     addedPiece.defaultPos = addedPiece.transform.position;
+                    addedPiece.targetPos = addedPiece.transform.position;
+                    addedPiece.lastMove = TargetPos;
                     addedPiece.canPlace = false;
                     addedPiece.canDrag = true;
                     boardManager.PlacePiece(curCellPos, addedPiece);
@@ -118,6 +130,17 @@ public class Piece : MonoBehaviour
             else
                 transform.position= defaultPos;
         }
+    }
+
+    public Vector3Int CalcCurCellPos()
+    {
+        var curCellPos = Vector3Int.RoundToInt(currentPos - offset);
+        if (currentPos.x - curCellPos.x > offset.x)
+            curCellPos.x += (int)(2 * offset.x);
+        if (currentPos.y - curCellPos.y > offset.y)
+            curCellPos.y += (int)(2 * offset.y);
+
+        return curCellPos;
     }
 }
 
