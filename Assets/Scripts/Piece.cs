@@ -23,9 +23,7 @@ public class Piece : MonoBehaviour
     public Piece target;
 
     public bool canDrag = false;
-    private bool canPlace = true;
-
-
+    private bool canPlace;
 
     public bool CanPlace
     {
@@ -59,6 +57,10 @@ public class Piece : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         defaultPos = transform.position;
+        if (tag == "Enemy")
+            canPlace = false;
+        else
+            canPlace = true;
     }
 
     public void OnMouseDown()
