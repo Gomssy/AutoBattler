@@ -10,6 +10,7 @@ public class BoardManager : Singleton<BoardManager>
     public Board boardPrefab;
 
     public GameObject placingMask;
+    private RectInt mask => new RectInt(0, 0, max_x, max_y);
     public bool[,] canPlacePiece;
     private bool[,] boards;
     private Piece[,] pieceLocations;
@@ -35,8 +36,6 @@ public class BoardManager : Singleton<BoardManager>
                 CreateBoard(x, y);
             }
         }
-        canPlacePiece[1, 0] = false;
-        canPlacePiece[9, 4] = false;
     }
 
     private Board CreateBoard(int x, int y)
@@ -56,12 +55,12 @@ public class BoardManager : Singleton<BoardManager>
 
     public bool canPlace(Vector3Int pos)
     {
-        return canPlacePiece[pos.x, pos.y] && boards[pos.x, pos.y] && pieceLocations[pos.x, pos.y] == null;
+        return mask.Contains(new Vector2Int(pos.x, pos.y)) && canPlacePiece[pos.x, pos.y] && boards[pos.x, pos.y] && pieceLocations[pos.x, pos.y] == null;
     }
 
     public bool PlacePiece(Vector3Int pos, Piece piece = null)
     {
-        if (boards[pos.x, pos.y])
+        if (mask.Contains(new Vector2Int(pos.x, pos.y)) && boards[pos.x, pos.y])
         {
             pieceLocations[pos.x, pos.y] = piece;
             return true;
