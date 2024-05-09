@@ -313,9 +313,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardManager: {fileID: 1833095086}
-  maxHealth: 5
-  defaultPos: {x: 0, y: 0, z: 0}
+  animator: {fileID: 0}
   offset: {x: 0.5, y: 0.5, z: 0}
+  canDrag: 0
 --- !u!224 &972739071
 RectTransform:
   m_ObjectHideFlags: 0
@@ -490,9 +490,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardManager: {fileID: 1833095086}
-  maxHealth: 5
-  defaultPos: {x: 0, y: 0, z: 0}
+  animator: {fileID: 0}
   offset: {x: 0.5, y: 0.5, z: 0}
+  canDrag: 0
 --- !u!61 &1533546290
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -549,7 +549,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardPrefab: {fileID: 2278212234567557784, guid: 39d2943962fb4564bb9ef869f9899806, type: 3}
-  boards: []
+  placingMask: {fileID: 0}
+  pieces: []
 --- !u!4 &1833095087
 Transform:
   m_ObjectHideFlags: 0

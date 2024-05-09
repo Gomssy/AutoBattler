@@ -8,7 +8,14 @@ public class BoardManager : Singleton<BoardManager>
     public static int max_y { get; set; } = 5;
 
     public Board boardPrefab;
-    public List<Board> boards = new List<Board>();
+
+    public GameObject placingMask;
+    public bool[,] canPlacePiece;
+    private bool[,] boards;
+    private Piece[,] pieceLocations;
+    public List<Piece> pieces;
+
+    private GameState gameState;
 
     private void Awake()
     {
@@ -17,14 +24,19 @@ public class BoardManager : Singleton<BoardManager>
 
     private void InitBoard()
     {
+        boards = new bool[max_x, max_y];
+        pieceLocations = new Piece[max_x, max_y];
+        canPlacePiece = new bool[max_x, max_y];
+
         for(int x = 0; x < max_x; x++)
         {
             for(int y = 0; y < max_y; y++)
             {
-                var board = CreateBoard(x, y);
-                boards.Add(board);
+                CreateBoard(x, y);
             }
         }
+        canPlacePiece[1, 0] = false;
+        canPlacePiece[9, 4] = false;
     }
 
     private Board CreateBoard(int x, int y)
@@ -35,17 +47,35 @@ public class BoardManager : Singleton<BoardManager>
         board.transform.position = new Vector3(x,y,0f);
         board.name = new Vector2Int(x, y).ToString();
 
+        boards[x, y] = true;
+        canPlacePiece[x, y] = true;
+        pieceLocations[x, y] = null;
+
         return board;
     }
 
-    public Board GetBoard(Vector3 pos)
+    public bool canPlace(Vector3Int pos)
     {
-        foreach(var board in boards)
+        return canPlacePiece[pos.x, pos.y] && boards[pos.x, pos.y] && pieceLocations[pos.x, pos.y] == null;
+    }
+
+    public bool PlacePiece(Vector3Int pos, Piece piece = null)
+    {
+        if (boards[pos.x, pos.y])
         {
-            if(Vector3Int.RoundToInt(board.transform.position) == Vector3Int.RoundToInt(pos))
-                return board;
+            pieceLocations[pos.x, pos.y] = piece;
+            return true;
+        }
+        return false;
+    }
+
+    public Piece AddPiece(Piece piece)
+    {
+        if(gameState == GameState.Idle)
+        {
+            pieces.Add(piece);
+            return piece;
         }
         return null;
     }
-
 }
