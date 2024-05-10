@@ -15,6 +15,7 @@ public class BoardManager : Singleton<BoardManager>
     protected Dictionary<Team, int> startPositionPerTeam = new Dictionary<Team, int>();
 
     public Piece temp;
+    public Piece temp2;
 
 
     private void Awake()
@@ -25,6 +26,9 @@ public class BoardManager : Singleton<BoardManager>
         startPositionPerTeam.Add(Team.Enemy, graph.Nodes.Count - 1);
 
         temp.Setup(Team.Ally, BoardManager.Inst.GetFreeNode(Team.Ally));
+        GameManager.Inst.allyPieces.Add(temp);
+        temp2.Setup(Team.Enemy, GetFreeNode(Team.Enemy));
+        GameManager.Inst.enemyPieces.Add(temp2);
     }
 
     private void InitBoard()
@@ -108,7 +112,7 @@ public class BoardManager : Singleton<BoardManager>
         {
             foreach(Node to in allNodes)
             {
-                if (Vector3.Distance(from.worldPos, to.worldPos) < 1f && from != to)
+                if (Vector3.Distance(from.worldPos, to.worldPos) <= 1f && from != to)
                     graph.AddEdge(from, to);
             }
         }

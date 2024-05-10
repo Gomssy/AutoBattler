@@ -321,6 +321,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d41db8069308ae46b58ecf6cd3e4e8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allyPieces: []
+  enemyPieces: []
 --- !u!4 &738632340
 Transform:
   m_ObjectHideFlags: 0
@@ -869,6 +871,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardPrefab: {fileID: 2278212234567557784, guid: 39d2943962fb4564bb9ef869f9899806, type: 3}
   temp: {fileID: 972739068}
+  temp2: {fileID: 962471831}
   fromIndex: 0
   toIndex: 0
 --- !u!4 &1833095087

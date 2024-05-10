@@ -44,6 +44,35 @@ public class Piece : MonoBehaviour
 
     protected void Start()
     {
+        GameManager.Inst.OnRoundStart += OnRoundStart;
+        GameManager.Inst.OnRoundEnd += OnRoundEnd;
+        GameManager.Inst.OnPieceDead += OnUnitDied;
+    }
+
+    protected virtual void OnRoundStart()
+    {
+        FindTarget();
+    }
+    protected virtual void OnRoundEnd() { }
+    protected virtual void OnUnitDied(Piece diedUnity) { }
+
+    public void Update()
+    {
+        if(!HasEnemy)
+            FindTarget();
+
+
+
+        if(InRange && !isMoving)
+        {
+            if(canAttack)
+            {
+                Attack();
+                curTarget.TakeDamage(dmg);
+            }
+        }
+        else
+            GetInRange();
     }
 
     protected void FindTarget()
@@ -80,7 +109,7 @@ public class Piece : MonoBehaviour
 
     protected void GetInRange()
     {
-        if (curTarget != null)
+        if (curTarget == null)
             return;
 
         if(!isMoving)

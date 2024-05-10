@@ -9,8 +9,8 @@ public class GameManager : Singleton<GameManager>
     public Action OnRoundEnd;
     public Action<Piece> OnPieceDead;
 
-    List<Piece> allyPieces = new List<Piece>();
-    List<Piece> enemyPieces = new List<Piece>();
+    public List<Piece> allyPieces = new List<Piece>();
+    public List<Piece> enemyPieces = new List<Piece>();
     
     public List<Piece> GetEnemyPieces(Team enemy)
     {
