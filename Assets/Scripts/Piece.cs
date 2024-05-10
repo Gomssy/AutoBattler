@@ -68,7 +68,7 @@ public class Piece : MonoBehaviour
             if(canAttack)
             {
                 Attack();
-                curTarget.TakeDamage(dmg);
+
             }
         }
         else
@@ -155,6 +155,7 @@ public class Piece : MonoBehaviour
     public void TakeDamage(int dmg)
     {
         health -= dmg;
+        Debug.Log(health);
         if(health <= 0 && !isDead)
         {
             isDead = true;
@@ -163,22 +164,26 @@ public class Piece : MonoBehaviour
         }
     }
 
+    void AttackEnd()
+    {
+        curTarget.TakeDamage(dmg);
+    }
     protected virtual void Attack()
     {
         if (!canAttack)
             return;
 
+        canAttack = false;
         animator.SetTrigger("attack");
+
         attackDelay = 1 / attackSpeed;
         StartCoroutine(Wait());
     }
 
     IEnumerator Wait()
     {
-        canAttack = false;
-        yield return null;
-        animator.ResetTrigger("attack");
         yield return new WaitForSeconds(attackDelay);
+        animator.ResetTrigger("attack");
         canAttack = true;
     }
 }

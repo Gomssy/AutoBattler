@@ -354,7 +354,7 @@ GameObject:
   - component: {fileID: 962471829}
   - component: {fileID: 962471828}
   - component: {fileID: 962471827}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: KNIGHT1_IDLE_1 (1)
   m_TagString: Ally
   m_Icon: {fileID: 0}
@@ -586,7 +586,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 9, y: 4}
+  m_AnchoredPosition: {x: 5, y: 2}
   m_SizeDelta: {x: 1.5, y: 1.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &972739064
@@ -605,7 +605,7 @@ GameObject:
   - component: {fileID: 972739073}
   - component: {fileID: 972739074}
   - component: {fileID: 972739075}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: KNIGHT1_IDLE_1
   m_TagString: Ally
   m_Icon: {fileID: 0}

@@ -93,12 +93,15 @@ public class Draggable : MonoBehaviour
 
     public Board GetBoardUnder()
     {
-        RaycastHit2D hit = Physics2D.Raycast(cam.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        RaycastHit2D[] hits = Physics2D.RaycastAll(cam.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
-        if (hit != null && hit.collider != null)
+        foreach(var hit in hits)
         {
-            Board board = hit.collider.GetComponent<Board>();
-            return board;
+            if(hit.collider != GetComponent<Collider2D>())
+            {
+                Board board = hit.collider.GetComponent<Board>();
+                return board;
+            }
         }
         return null;
     }
