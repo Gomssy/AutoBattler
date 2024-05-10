@@ -1,192 +1,156 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 using UnityEngine.EventSystems;
 
 public class Piece : MonoBehaviour
 {
-    public BoardManager boardManager;
-    private PieceState pieceState;
+    public SpriteRenderer spriteRenderer;
     public Animator animator;
 
-    private Vector3 defaultPos;
-    public Vector3 currentPos => transform.position;
-    public Vector3 offset = new Vector3(0.5f, 0.5f, 0f);
-
+    public int dmg = 1;
     public int health = 5;
-    public bool alive => health > 0;
-    public bool isRangeAttack;
+    public int range = 1;
+    public float attackSpeed = 1f;
+    public float moveSpeed = 1f;
 
-    private Vector3 targetPos;
-    public Vector3 TargetPos => targetPos;
-    public Vector3 lastMove;
-    public Piece target;
+    protected Team myTeam;
+    protected Piece curTarget = null;
+    protected Node curNode;
+    public Node CurNode => curNode;
+    protected Node dest;
 
-    public bool canDrag = false;
-    private bool canPlace;
 
-    public bool CanPlace
+    protected bool HasEnemy => curTarget != null;
+    protected bool InRange => curTarget != null && Vector3.Distance(transform.position, curTarget.transform.position) <= range;
+    protected bool isMoving;
+    protected bool isDead = false;
+    protected bool canAttack = true;
+    protected float attackDelay;
+
+    public void Setup(Team team, Node curNode)
     {
-        get
+        myTeam = team;
+        if(myTeam == Team.Enemy)
         {
-            return canPlace;
+            spriteRenderer.flipX = true;
         }
-        set
-        {
-            canPlace = value;
-        }
+
+        this.curNode = curNode;
+        transform.position = curNode.worldPos;
+        curNode.SetOccupied(true);
     }
 
-    public bool canClick
+    protected void Start()
     {
-        get
+    }
+
+    protected void FindTarget()
+    {
+        var enemies = GameManager.Inst.GetEnemyPieces(myTeam);
+        float minDist = Mathf.Infinity;
+        Piece piece = null;
+
+        foreach(var enemy in enemies)
         {
-            return canDrag || CanPlace;
-        }
-        set
-        {
-            if(value == false)
+            if ((Vector3.Distance(enemy.transform.position, transform.position) <= minDist))
             {
-                canDrag = false;
-                CanPlace = false;
+                minDist = Vector3.Distance(enemy.transform.position, transform.position);
+                piece = enemy;
             }
         }
+        curTarget = piece;
     }
 
-    private void Awake()
+    protected bool Move(Node nextNode)
     {
-        animator = GetComponent<Animator>();
-        defaultPos = transform.position;
-        if (tag == "Enemy")
-            canPlace = false;
-        else
-            canPlace = true;
-    }
-
-    public void OnMouseDown()
-    {
-       if (!canClick) return;
-    }
-    public void OnMouseDrag()
-    {
-        if (CanPlace)
+        Vector3 dir = (nextNode.worldPos - transform.position);
+        if(dir.sqrMagnitude <= 0.005f)
         {
-            /*if (!BoardManager.Inst.placingMask.activeSelf)
-                BoardManager.Inst.placingMask.SetActive(true);*/
-            Vector3 curPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0f);
-            Vector3 curPos = Camera.main.ScreenToWorldPoint(curPoint);
-            curPos.z = 0f;
-            transform.position = curPos;
-        }
-        if (canDrag)
-        {
-            Vector3 curPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0f);
-            Vector3 curPos = Camera.main.ScreenToWorldPoint(curPoint);
-            curPos.z = 0f;
-            transform.position = curPos;
-        }
-
-    }
-
-    public void OnMouseUp()
-    {
-        if(canDrag)
-        {
-            var curCellPos = CalcCurCellPos();
-            if (boardManager.canPlace(curCellPos))
-            {
-                boardManager.PlacePiece(Vector3Int.RoundToInt(defaultPos), null);
-                boardManager.PlacePiece(curCellPos, this);
-
-                transform.position = curCellPos;
-                defaultPos = transform.position;
-                targetPos = transform.position;
-                lastMove = TargetPos;
-            }
-            else
-            {
-                transform.position = defaultPos;
-            }
-        }
-        
-        if(CanPlace)
-        {
-            //boardManager.placingMask.SetActive(false);
-            var curCellPos = CalcCurCellPos();
-            if (boardManager.canPlace(curCellPos))
-            {
-                var addedPiece = boardManager.AddPiece(this);
-                if (addedPiece != null)
-                {
-                    addedPiece.transform.position = curCellPos;
-                    addedPiece.defaultPos = addedPiece.transform.position;
-                    addedPiece.targetPos = addedPiece.transform.position;
-                    addedPiece.lastMove = TargetPos;
-                    addedPiece.canPlace = false;
-                    addedPiece.canDrag = true;
-                    boardManager.PlacePiece(curCellPos, addedPiece);
-                }
-                else
-                    transform.position = defaultPos;
-            }
-            else
-                transform.position= defaultPos;
-        }
-    }
-
-    public Vector3Int CalcCurCellPos()
-    {
-        var curCellPos = Vector3Int.RoundToInt(currentPos - offset);
-        if (currentPos.x - curCellPos.x > offset.x)
-            curCellPos.x += (int)(2 * offset.x);
-        if (currentPos.y - curCellPos.y > offset.y)
-            curCellPos.y += (int)(2 * offset.y);
-
-        return curCellPos;
-    }
-    public bool Move(Vector3 target)
-    {
-        if (pieceState is PieceState.Idle)
-        {
-            targetPos = target;
-            lastMove = TargetPos;
-
-            animator.SetBool("isMoving", true);
-            pieceState = PieceState.Move;
-            StartCoroutine("MoveStep");
+            transform.position = nextNode.worldPos;
+            animator.SetBool("isMoving", false);
             return true;
         }
-        else
-            return false;
+        animator.SetBool("isMoving", true);
+
+        transform.position += dir.normalized * moveSpeed * Time.deltaTime;
+        return false;
     }
 
-    IEnumerator MoveStep()
+    protected void GetInRange()
     {
-        var percent = 0f;
-        if (target.transform.position.x < transform.position.x)
-            GetComponent<SpriteRenderer>().flipX = true;
+        if (curTarget != null)
+            return;
 
-        while(pieceState is PieceState.Move)
+        if(!isMoving)
         {
-            transform.position = Vector3.Lerp(transform.position, targetPos, percent);
-            if (percent >= 1f)
+            dest = null;
+            List<Node> candidates = BoardManager.Inst.GetNodesNear(curTarget.curNode);
+            candidates = candidates.OrderBy(x => Vector3.Distance(x.worldPos, transform.position)).ToList();
+
+            for(int i = 0; i < candidates.Count; i++)
             {
-                transform.position = targetPos;
-                pieceState = PieceState.Idle;
-                animator.SetBool("Stop", true);
-                yield break;
+                if (!candidates[i].IsOccupied)
+                {
+                    dest = candidates[i];
+                    break;
+                }
             }
-            else
-                yield return null;
+            if (dest == null)
+                return;
+
+            var path = BoardManager.Inst.GetPath(curNode, dest);
+            if (path == null && path.Count >= 1)
+                return;
+            if (path[1].IsOccupied)
+                return;
+
+            path[1].SetOccupied(true);
+            dest = path[1];
         }
-        yield break;
+
+        isMoving = !Move(dest);
+        if(!isMoving)
+        {
+            curNode.SetOccupied(false);
+            SetCurrentNode(dest);
+        }
+    }
+
+    public void SetCurrentNode(Node node)
+    {
+        curNode = node;
+    }
+
+    public void TakeDamage(int dmg)
+    {
+        health -= dmg;
+        if(health <= 0 && !isDead)
+        {
+            isDead = true;
+            curNode.SetOccupied(false);
+            GameManager.Inst.PieceDead(this);
+        }
+    }
+
+    protected virtual void Attack()
+    {
+        if (!canAttack)
+            return;
+
+        animator.SetTrigger("attack");
+        attackDelay = 1 / attackSpeed;
+        StartCoroutine(Wait());
+    }
+
+    IEnumerator Wait()
+    {
+        canAttack = false;
+        yield return null;
+        animator.ResetTrigger("attack");
+        yield return new WaitForSeconds(attackDelay);
+        canAttack = true;
     }
 }
-
-    public enum PieceState
-{
-    Idle,
-    Move,
-    Attack,
-    Dead
-}
+    
