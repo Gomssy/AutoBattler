@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Melee : Piece
 {
+    protected override bool InRange => curTarget != null && Vector3.Distance(transform.position, curTarget.transform.position) <= Mathf.Sqrt(Mathf.Pow(range,2) + Mathf.Pow(range,2));
     protected override void OnRoundStart()
     {
         FindTarget();
@@ -12,7 +13,7 @@ public class Melee : Piece
     {
         if(GameManager.Inst.gameState == GameState.Battle)
         {
-            if (!HasEnemy)
+            //if (!HasEnemy)
                 FindTarget();
 
 

@@ -26,7 +26,7 @@ public class Piece : MonoBehaviour
 
 
     protected bool HasEnemy => curTarget != null;
-    protected bool InRange => curTarget != null && Vector3.Distance(transform.position, curTarget.transform.position) <= range;
+    protected virtual bool InRange => curTarget != null && Vector3.Distance(transform.position, curTarget.transform.position) <= range;
     protected bool isMoving;
     protected bool isDead = false;
     protected bool canAttack = true;

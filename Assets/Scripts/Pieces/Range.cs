@@ -12,7 +12,7 @@ public class Range : Piece
     {
         if (GameManager.Inst.gameState == GameState.Battle)
         {
-            if (!HasEnemy)
+           // if (!HasEnemy)
                 FindTarget();
 
 
