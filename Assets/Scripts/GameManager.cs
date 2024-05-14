@@ -69,14 +69,14 @@ public class GameManager : Singleton<GameManager>
     {
         for(int i = 0; i < maxUnitCount; i++)
         {
-            int rand = UnityEngine.Random.Range(0, pieceList.Count - 1);
+            int rand = UnityEngine.Random.Range(0, pieceList.Count);
             Piece enemy = Instantiate(pieceList[rand], enemyParent);
             enemy.GetComponent<SpriteRenderer>().color = Color.red;
 
             enemyPieces.Add(enemy);
             enemy.Init(Team.Enemy, BoardManager.Inst.GetRandNode());
 
-            int rand2 = UnityEngine.Random.Range(0, pieceList.Count - 1);
+            int rand2 = UnityEngine.Random.Range(0, pieceList.Count);
             Piece ally = Instantiate(pieceList[rand2], allyParent);
             allyPieces.Add(ally);
             ally.Init(Team.Ally, BoardManager.Inst.GetFreeNode(Team.Ally));

@@ -72,10 +72,10 @@ public class BoardManager : Singleton<BoardManager>
 
     public Node GetRandNode()
     {
-        int curIdx = UnityEngine.Random.Range(25, 49);
+        int curIdx = UnityEngine.Random.Range(25, 50);
         while (graph.Nodes[curIdx].IsOccupied)
         {
-            int randIdx = UnityEngine.Random.Range(25, 49);
+            int randIdx = UnityEngine.Random.Range(25, 50);
             curIdx = randIdx;
         }
         return graph.Nodes[curIdx];
