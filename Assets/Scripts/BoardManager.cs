@@ -14,10 +14,6 @@ public class BoardManager : Singleton<BoardManager>
     protected Graph graph;
     protected Dictionary<Team, int> startPositionPerTeam = new Dictionary<Team, int>();
 
-    public Piece temp;
-    public Piece temp2;
-
-
     private void Awake()
     {
         InitBoard();
@@ -25,10 +21,7 @@ public class BoardManager : Singleton<BoardManager>
         startPositionPerTeam.Add(Team.Ally, 0);
         startPositionPerTeam.Add(Team.Enemy, graph.Nodes.Count - 1);
 
-        temp.Setup(Team.Ally, BoardManager.Inst.GetFreeNode(Team.Ally));
-        GameManager.Inst.allyPieces.Add(temp);
-        temp2.Setup(Team.Enemy, GetFreeNode(Team.Enemy));
-        GameManager.Inst.enemyPieces.Add(temp2);
+
     }
 
     private void InitBoard()
@@ -77,6 +70,17 @@ public class BoardManager : Singleton<BoardManager>
         return graph.Nodes[curIdx];
     }
 
+    public Node GetRandNode()
+    {
+        int curIdx = UnityEngine.Random.Range(25, 49);
+        while (graph.Nodes[curIdx].IsOccupied)
+        {
+            int randIdx = UnityEngine.Random.Range(25, 49);
+            curIdx = randIdx;
+        }
+        return graph.Nodes[curIdx];
+    }
+
     public List<Node> GetPath(Node from, Node to)
     {
         return graph.GetShortestPath(from, to);
@@ -95,6 +99,37 @@ public class BoardManager : Singleton<BoardManager>
             if(board.transform.GetSiblingIndex() == allNodes[i].idx)
                 return allNodes[i];
         }
+        return null;
+    }
+
+    public List<Node> GetSurroundingNodes(Node center, int radius)
+    {
+        List<Node> surroundings = new List<Node>();
+
+        foreach(Node node in graph.Nodes)
+        {
+            if (Vector3.Distance(node.worldPos, center.worldPos) <= Mathf.Sqrt(2) && node != center)
+            {
+                surroundings.Add(node);
+            }
+        }
+
+        return surroundings;
+    }
+
+    public Piece GetPieceOnNode(Node node)
+    {
+        foreach(Piece piece in GameManager.Inst.allyPieces)
+        {
+            if(piece.CurNode == node)
+                return piece;
+        }
+        foreach(Piece piece in GameManager.Inst.enemyPieces)
+        {
+            if (piece.CurNode == node)
+                return piece;
+        }
+
         return null;
     }
 
@@ -118,7 +153,7 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
 
-    public int fromIndex = 0;
+    /*public int fromIndex = 0;
     public int toIndex = 0;
 
     private void OnDrawGizmos()
@@ -156,6 +191,6 @@ public class BoardManager : Singleton<BoardManager>
                 Debug.DrawLine(path[i - 1].worldPos, path[i].worldPos, Color.red, 10);
             }
         }
-    }
+    }*/
 
 }

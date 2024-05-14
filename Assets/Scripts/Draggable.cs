@@ -7,7 +7,6 @@ public class Draggable : MonoBehaviour
 {
     public Vector3 dragOffset = new Vector3(0f, 0.5f, 0f);
     public RectInt mask = new RectInt(0, 0, 10, 5);
-    public LayerMask releaseMask;
 
     private Vector3 prevPos;
     private Board prevBoard = null;
@@ -25,11 +24,15 @@ public class Draggable : MonoBehaviour
 
     public void OnDragStart()
     {
-        prevPos = transform.position;
-        prevSortingOrder = spriteRenderer.sortingOrder;
+        if(GameManager.Inst.gameState is GameState.Prepare && GetComponent<Piece>().myTeam is Team.Ally)
+        {
+            prevPos = transform.position;
+            prevSortingOrder = spriteRenderer.sortingOrder;
 
-        spriteRenderer.sortingOrder = 20;
-        isDragging = true;
+            spriteRenderer.sortingOrder = 20;
+            isDragging = true;
+        }
+
     }
 
     public void OnDragging()
@@ -42,8 +45,12 @@ public class Draggable : MonoBehaviour
         transform.position = newPos;
 
         Board boardUnder = GetBoardUnder();
-        if (boardUnder != null)
+        if (boardUnder != null )
         {
+            boardUnder.SetHighlight(true, !(BoardManager.Inst.GetNodeForBoard(boardUnder).IsOccupied || BoardManager.Inst.GetNodeForBoard(boardUnder).idx >= 25));
+
+            if (prevBoard != null && boardUnder != prevBoard)
+                prevBoard.SetHighlight(false, false);
             prevBoard = boardUnder;
         }
 
@@ -60,6 +67,7 @@ public class Draggable : MonoBehaviour
 
         if(prevBoard != null)
         {
+            prevBoard.SetHighlight(false, false);
             prevBoard = null;
         }
 
@@ -75,7 +83,7 @@ public class Draggable : MonoBehaviour
         {
             Piece piece = GetComponent<Piece>();
             Node candidateNode = BoardManager.Inst.GetNodeForBoard(board);
-            if(candidateNode != null && piece != null)
+            if(candidateNode != null && piece != null && candidateNode.idx < 25)
             {
                 if(!candidateNode.IsOccupied)
                 {
@@ -83,7 +91,6 @@ public class Draggable : MonoBehaviour
                     piece.SetCurrentNode(candidateNode);
                     candidateNode.SetOccupied(true);
                     piece.transform.position = candidateNode.worldPos;
-
                     return true;
                 }
             }

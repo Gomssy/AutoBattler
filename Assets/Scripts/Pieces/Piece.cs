@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.EventSystems;
+using static UnityEngine.GraphicsBuffer;
 
 public class Piece : MonoBehaviour
 {
+    public GameObject healthBarPrefab;
+    protected HealthBar healthBar;
     public SpriteRenderer spriteRenderer;
     public Animator animator;
 
@@ -15,7 +18,7 @@ public class Piece : MonoBehaviour
     public float attackSpeed = 1f;
     public float moveSpeed = 1f;
 
-    protected Team myTeam;
+    public Team myTeam;
     protected Piece curTarget = null;
     protected Node curNode;
     public Node CurNode => curNode;
@@ -29,7 +32,7 @@ public class Piece : MonoBehaviour
     protected bool canAttack = true;
     protected float attackDelay;
 
-    public void Setup(Team team, Node curNode)
+    public void Init(Team team, Node curNode)
     {
         myTeam = team;
         if(myTeam == Team.Enemy)
@@ -40,6 +43,11 @@ public class Piece : MonoBehaviour
         this.curNode = curNode;
         transform.position = curNode.worldPos;
         curNode.SetOccupied(true);
+
+        GameObject healthBarGO = Instantiate(healthBarPrefab);
+        healthBar = healthBarGO.GetComponent<HealthBar>();
+        healthBar.transform.SetParent(transform);
+        healthBar.Init(transform, health);
     }
 
     protected void Start()
@@ -49,33 +57,12 @@ public class Piece : MonoBehaviour
         GameManager.Inst.OnPieceDead += OnUnitDied;
     }
 
-    protected virtual void OnRoundStart()
-    {
-        FindTarget();
-    }
+    protected virtual void OnRoundStart() { }
+
     protected virtual void OnRoundEnd() { }
-    protected virtual void OnUnitDied(Piece diedUnity) { }
+    protected virtual void OnUnitDied(Piece diedUnit) { }
 
-    public void Update()
-    {
-        if(!HasEnemy)
-            FindTarget();
-
-
-
-        if(InRange && !isMoving)
-        {
-            if(canAttack)
-            {
-                Attack();
-
-            }
-        }
-        else
-            GetInRange();
-    }
-
-    protected void FindTarget()
+    protected virtual void FindTarget()
     {
         var enemies = GameManager.Inst.GetEnemyPieces(myTeam);
         float minDist = Mathf.Infinity;
@@ -90,6 +77,7 @@ public class Piece : MonoBehaviour
             }
         }
         curTarget = piece;
+
     }
 
     protected bool Move(Node nextNode)
@@ -112,13 +100,13 @@ public class Piece : MonoBehaviour
         if (curTarget == null)
             return;
 
-        if(!isMoving)
+        if (!isMoving)
         {
             dest = null;
             List<Node> candidates = BoardManager.Inst.GetNodesNear(curTarget.curNode);
             candidates = candidates.OrderBy(x => Vector3.Distance(x.worldPos, transform.position)).ToList();
 
-            for(int i = 0; i < candidates.Count; i++)
+            for (int i = 0; i < candidates.Count; i++)
             {
                 if (!candidates[i].IsOccupied)
                 {
@@ -126,21 +114,23 @@ public class Piece : MonoBehaviour
                     break;
                 }
             }
+
             if (dest == null)
                 return;
 
-            var path = BoardManager.Inst.GetPath(curNode, dest);
-            if (path == null && path.Count >= 1)
-                return;
-            if (path[1].IsOccupied)
+            var path = BoardManager.Inst.GetPath(curNode, curTarget.curNode);
+            if (path == null || path.Count < 2)
                 return;
 
-            path[1].SetOccupied(true);
             dest = path[1];
+            if (dest.IsOccupied)
+                return;
+
+            dest.SetOccupied(true);
         }
 
         isMoving = !Move(dest);
-        if(!isMoving)
+        if (!isMoving)
         {
             curNode.SetOccupied(false);
             SetCurrentNode(dest);
@@ -155,7 +145,7 @@ public class Piece : MonoBehaviour
     public void TakeDamage(int dmg)
     {
         health -= dmg;
-        Debug.Log(health);
+        healthBar.UpdateBar(health);
         if(health <= 0 && !isDead)
         {
             isDead = true;
@@ -164,9 +154,10 @@ public class Piece : MonoBehaviour
         }
     }
 
-    void AttackEnd()
+    protected virtual void AttackEnd()
     {
-        curTarget.TakeDamage(dmg);
+        if(curTarget != null)
+            curTarget.TakeDamage(dmg);
     }
     protected virtual void Attack()
     {
