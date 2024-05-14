@@ -73,8 +73,6 @@ public class MeleeWide : Piece
         }
         yield return new WaitForSeconds(attackDelay);
 
-
-        Debug.Log("enemies : " + targets.Count);
         animator.ResetTrigger("attack");
         canAttack = true;
     }

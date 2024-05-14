@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.EventSystems;
-using static UnityEngine.GraphicsBuffer;
 
 public class Piece : MonoBehaviour
 {

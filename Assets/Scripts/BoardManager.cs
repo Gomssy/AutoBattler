@@ -152,45 +152,4 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
     }
-
-    /*public int fromIndex = 0;
-    public int toIndex = 0;
-
-    private void OnDrawGizmos()
-    {
-        if (graph == null)
-            return;
-
-        var allEdges = graph.Edges;
-        if (allEdges == null)
-            return;
-
-        foreach (Edge e in allEdges)
-        {
-            Debug.DrawLine(e.from.worldPos, e.to.worldPos, Color.black, 100);
-        }
-
-        var allNodes = graph.Nodes;
-        if (allNodes == null)
-            return;
-
-        foreach (Node n in allNodes)
-        {
-            Gizmos.color = n.IsOccupied ? Color.red : Color.green;
-            Gizmos.DrawSphere(n.worldPos, 0.1f);
-        }
-
-        if (fromIndex >= allNodes.Count || toIndex >= allNodes.Count)
-            return;
-
-        List<Node> path = graph.GetShortestPath(allNodes[fromIndex], allNodes[toIndex]);
-        if (path.Count > 1)
-        {
-            for (int i = 1; i < path.Count; i++)
-            {
-                Debug.DrawLine(path[i - 1].worldPos, path[i].worldPos, Color.red, 10);
-            }
-        }
-    }*/
-
 }

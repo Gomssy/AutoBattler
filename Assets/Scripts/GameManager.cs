@@ -1,7 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -20,13 +21,31 @@ public class GameManager : Singleton<GameManager>
     private Transform enemyParent;
     [SerializeField]
     private Transform allyParent;
+    [SerializeField]
+    private GameObject startButton;
 
     public GameState gameState;
+    private string resultText = "";
+    [SerializeField]
+    private TextMeshProUGUI text;
+    [SerializeField]
+    private GameObject resultPage;
 
     private void Start()
     {
         gameState = GameState.Prepare;
+        resultPage.SetActive(false);
         SpawnPiece();
+    }
+
+    private void Update()
+    {
+        if (allyPieces.Count <= 0 || enemyPieces.Count <= 0)
+        {
+            gameState = GameState.End;
+            GameEnd();
+        }
+
     }
     public List<Piece> GetEnemyPieces(Team enemy)
     {
@@ -68,7 +87,20 @@ public class GameManager : Singleton<GameManager>
     public void StartBattle()
     {
         gameState = GameState.Battle;
+        startButton.SetActive(false);
         OnRoundStart?.Invoke();
+    }
+
+    public void GameEnd()
+    {
+        resultPage.SetActive(true);
+        resultText = allyPieces.Count > enemyPieces.Count ? "You Win!" : "You Lose...";
+        text.text = resultText;
+    }
+
+    public void ReloadScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
 
