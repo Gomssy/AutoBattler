@@ -5,15 +5,13 @@ using UnityEngine;
 public class MeleeWide : Piece
 {
     protected List<Piece> targets;
+    protected override bool InRange => curTarget != null && Vector3.Distance(transform.position, curTarget.transform.position) <= Mathf.Sqrt(Mathf.Pow(range, 2) + Mathf.Pow(range, 2));
+
     protected override void OnRoundStart()
     {
         FindTarget();
     }
 
-    protected override void FindTarget()
-    {
-        base.FindTarget();
-    }
     public void Update()
     {
         if (GameManager.Inst.gameState == GameState.Battle)

@@ -62,7 +62,7 @@ public class Piece : MonoBehaviour
     protected virtual void OnRoundEnd() { }
     protected virtual void OnUnitDied(Piece diedUnit) { }
 
-    protected virtual void FindTarget()
+    public virtual void FindTarget()
     {
         var enemies = GameManager.Inst.GetEnemyPieces(myTeam);
         float minDist = Mathf.Infinity;
@@ -114,19 +114,17 @@ public class Piece : MonoBehaviour
                     break;
                 }
             }
-
             if (dest == null)
                 return;
 
-            var path = BoardManager.Inst.GetPath(curNode, curTarget.curNode);
-            if (path == null || path.Count < 2)
+            var path = BoardManager.Inst.GetPath(curNode, dest);
+            if (path == null && path.Count >= 1)
+                return;
+            if (path[1].IsOccupied)
                 return;
 
+            path[1].SetOccupied(true);
             dest = path[1];
-            if (dest.IsOccupied)
-                return;
-
-            dest.SetOccupied(true);
         }
 
         isMoving = !Move(dest);

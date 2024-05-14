@@ -68,6 +68,7 @@ public class GameManager : Singleton<GameManager>
     public void StartBattle()
     {
         gameState = GameState.Battle;
+        OnRoundStart?.Invoke();
     }
 
 
